@@ -211,7 +211,7 @@
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; margin-bottom: 5px; color: var(--gold); }
     .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--gold); background-color: var(--light-gold); color: var(--dark-gray); box-sizing: border-box; }
-    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 25px; background-color: var(--gold); color: var(--deep-red); font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; text-align: center; }
+    .btn { display: block; width: 100%; padding: 12px; border: none; border-radius: 25px; background-color: var(--gold); color: var(--deep-red); font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; text-align: center; text-decoration: none; }
     .btn:hover { background-color: #e6c300; }
     .link-text { text-align: center; margin-top: 15px; }
     .link-text a { color: var(--gold); text-decoration: none; font-weight: bold; }
@@ -276,10 +276,10 @@
     .animation-title { font-family: 'Cinzel Decorative', cursive; margin: 15px 0 5px; font-size: 1.8rem; color: var(--gold); text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
     .animation-text { margin: 0; font-size: 0.9rem; opacity: 0.8; }
     .login-animation { position: relative; width: 80px; height: 80px; margin: 0 auto 20px; }
-    .loader { width: 80px; height: 80px; border: 5px solid rgba(255, 255, 255, 0.3); border-top-color: #ffffff; border-radius: 50%; animation: spin 1s linear infinite; transition: opacity 0.3s, transform 0.3s; }
+    .loader { width: 80px; height: 80px; border: 5px solid rgba(255, 255, 255, 0.3); border-top-color: green; border-radius: 50%; animation: spin 1s linear infinite; transition: opacity 0.3s, transform 0.3s; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 4; stroke: #fff; stroke-miterlimit: 10; position: absolute; top: 0; left: 0; opacity: 0; transform: scale(0.8); transition: opacity 0.3s 0.2s, transform 0.4s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: #fff; fill: none; }
+    .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 4; stroke: green ; stroke-miterlimit: 10; position: absolute; top: 0; left: 0; opacity: 0; transform: scale(0.8); transition: opacity 0.3s 0.2s, transform 0.4s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 4; stroke-miterlimit: 10; stroke: green; fill: none; }
     .animation-container.success .checkmark__circle { animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
     .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; }
     .animation-container.success .checkmark__check { animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
@@ -478,6 +478,10 @@
 <body>
 <!-- Audio element for the game countdown sound -->
 <audio id="game-audio" loop src="https://raw.githubusercontent.com/Anandkhuman/housie/main/lagao.mp3" preload="auto"></audio>
+<!-- Audio elements for win and loss sounds -->
+<audio id="win-sound" src="https://raw.githubusercontent.com/Anandkhuman/lagao/main/win.mp3" preload="auto"></audio>
+<audio id="loss-sound" src="https://raw.githubusercontent.com/Anandkhuman/lagao/main/loss.mp3" preload="auto"></audio>
+
 <!-- ============================================== -->
 <!-- ============== PAGE CONTAINERS =============== -->
 <!-- ============================================== -->
@@ -506,8 +510,8 @@
             <div class="chip-selector">
                 <button class="chip" data-value="10">10</button>
                 <button class="chip" data-value="20">20</button>
-                <button class="chip" data-value="50">50</button>
-                <button class="chip active" data-value="100">100</button>
+                <button class="chip active" data-value="50">50</button>
+                <button class="chip" data-value="100">100</button>
                 <button class="chip" data-value="200">200</button>
             </div>
             <button id="clear-bets-btn" class="clear-btn">Clear Bets</button>
@@ -832,6 +836,23 @@
     </div>
 </div>
 
+<!-- NEW Info/Welcome Modal Popup -->
+<div id="info-modal" class="modal-overlay">
+    <div class="modal-content" style="text-align: center;">
+        <div style="text-align: center; margin-bottom: 5px;">
+            <img src="https://raw.githubusercontent.com/Anandkhuman/Photo/main/logo1.png" title="Sintha Team" alt="Sintha Team Logo" style="max-width: 120px; border-radius: 10px;">
+        </div>
+        <p>
+            <b>Sintha Team</b> offers fully developed Tambola or Housie games and Jandi Munda or Lagao websites.
+            If you would like to organize games and purchase a custom website <hr> please contact us for more information.
+        </p>
+        <div class="modal-actions" style="display: flex; gap: 5px; margin-top: 10px;">
+            <a href="https://sinthahousie.in/contact" id="info-modal-contact-btn" target="_blank" class="btn" style="flex: 1;">Contact Us</a>
+            <button id="info-modal-close-btn" class="btn" style="flex: 1; background-color: #777;">Not Now</button>
+        </div>
+    </div>
+</div>
+
 <!-- ============================================== -->
 <!-- ============== BOTTOM NAV BAR ================ -->
 <!-- ============================================== -->
@@ -853,14 +874,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ================== FIREBASE CONFIGURATION ==================
     const firebaseConfig = {
-  apiKey: "AIzaSyDsuKrszCugSRC3v4Bdpjz-7Q1utsQ-8bk",
-  authDomain: "sinthalagao.firebaseapp.com",
-  databaseURL: "https://sinthalagao-default-rtdb.firebaseio.com",
-  projectId: "sinthalagao",
-  storageBucket: "sinthalagao.firebasestorage.app",
-  messagingSenderId: "211209478368",
-  appId: "1:211209478368:web:bdf8d3cc048d04459d3085",
-  measurementId: "G-MKDY6WXN2C"
+      apiKey: "AIzaSyDsuKrszCugSRC3v4Bdpjz-7Q1utsQ-8bk",
+      authDomain: "sinthalagao.firebaseapp.com",
+      databaseURL: "https://sinthalagao-default-rtdb.firebaseio.com",
+      projectId: "sinthalagao",
+      storageBucket: "sinthalagao.firebasestorage.app",
+      messagingSenderId: "211209478368",
+      appId: "1:211209478368:web:bdf8d3cc048d04459d3085",
+      measurementId: "G-MKDY6WXN2C"
     };
     
     firebase.initializeApp(firebaseConfig);
@@ -879,9 +900,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let liveBetsRef = null; // To manage Firebase listener for admin live bets
     let currentLiveBetPeriod = null; // Track which period admin is listening to
     
-    // NEW: State for admin's result selection, now an object to hold counts.
+    // State for admin's result selection, now an object to hold counts.
     let adminSelectionCounts = {};
     
+    // Flag to track if the user has interacted, unlocking audio.
+    let isAudioUnlocked = false;
+
     db.ref('settings/paymentDetails').on('value', snapshot => {
         const settings = snapshot.val();
         if (settings && settings.upiId) {
@@ -971,7 +995,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginSuccessTicket = document.getElementById('login-success-ticket');
     const withdrawalSection = document.getElementById('withdrawal-section'); 
     const gameAudio = document.getElementById('game-audio');
+    const winSound = document.getElementById('win-sound');
+    const lossSound = document.getElementById('loss-sound');
+    const infoModal = document.getElementById('info-modal');
+    const infoModalCloseBtn = document.getElementById('info-modal-close-btn');
+    const infoModalContactBtn = document.getElementById('info-modal-contact-btn');
 
+    // ==================== AUDIO LOGIC (REVISED AND ROBUST) ====================
+    
+    /**
+     * Unlocks all audio contexts. This MUST be called after a user interaction (e.g., a click).
+     * It mutes, plays, and pauses all audio elements to prime them for programmatic playback.
+     */
+    const unlockAudio = () => {
+        if (isAudioUnlocked) return;
+
+        const audioElements = [gameAudio, winSound, lossSound];
+        const playPromises = [];
+
+        audioElements.forEach(audioEl => {
+            audioEl.muted = true;
+            const playPromise = audioEl.play();
+            if (playPromise !== undefined) {
+                playPromises.push(
+                    playPromise.then(() => {
+                        audioEl.pause();
+                        audioEl.currentTime = 0;
+                        audioEl.muted = false; // Unmute for actual use
+                    })
+                );
+            }
+        });
+
+        Promise.all(playPromises)
+            .then(() => {
+                isAudioUnlocked = true;
+                console.log("All audio contexts have been successfully unlocked.");
+            })
+            .catch(error => {
+                console.error("An error occurred while trying to unlock audio contexts:", error);
+                // Even if one fails, we don't want to block the UI, so we proceed.
+                // The browser might still allow playback later.
+            });
+    };
+    
+    /**
+     * Plays the main game countdown audio if enabled and unlocked.
+     */
+    const playAudio = () => {
+        if (!isAudioUnlocked || !AppState.audioSettings.enabled) return;
+        if (gameAudio.paused) {
+            const playPromise = gameAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => { console.warn("Countdown audio playback was prevented:", error); });
+            }
+        }
+    };
+
+    /**
+     * Pauses the main game countdown audio and resets its time.
+     */
+    const pauseAudio = () => {
+        if (!gameAudio.paused) {
+            gameAudio.pause();
+            gameAudio.currentTime = 0; 
+        }
+    };
+    
     // ==================== PAGE NAVIGATION & UI UPDATES ====================
     const showPage = (pageId) => {
         pages.forEach(page => page.classList.remove('active'));
@@ -1006,7 +1096,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.style.display = AppState.currentUser.role === 'admin' ? 'flex' : 'none';
             });
 
-            // Hide wallet page for admins as they don't have a playable balance
             if (AppState.currentUser.role === 'admin') {
                 const walletNavItem = document.querySelector('.nav-item[data-page="wallet"]');
                 if (walletNavItem) walletNavItem.style.display = 'none';
@@ -1560,7 +1649,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========== LIVE BETTING LOGIC (ADMIN & USER) ===========================
     // =========================================================================
 
-    // Stops listening to the live bets for a period.
     const stopListeningToLiveBets = () => {
         if (liveBetsRef) {
             liveBetsRef.off();
@@ -1569,35 +1657,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // This function decides whether to show the admin live betting panel and attach listeners.
     const manageAdminLiveView = () => {
         const liveStatusContainer = document.getElementById('live-betting-status');
-        const adminControls = document.getElementById('admin-controls-section'); // NEW
+        const adminControls = document.getElementById('admin-controls-section');
         const isAdmin = AppState.currentUser?.role === 'admin';
         const isGamePageActive = document.getElementById('page-game').classList.contains('active');
 
         if (isAdmin && isGamePageActive) {
             liveStatusContainer.style.display = 'block';
-            adminControls.style.display = 'block'; // NEW
-            renderAdminResultSelector(); // NEW: Render the controls
+            adminControls.style.display = 'block';
+            renderAdminResultSelector();
             const currentPeriodId = gameState.serverState?.periodId;
             if (currentPeriodId) {
-                // If the game period has changed, switch the listener to the new period.
                 if (currentLiveBetPeriod !== currentPeriodId) {
                     listenToLiveBets(currentPeriodId);
                 }
             }
         } else {
-            // Hide the panel and stop listening if not admin or not on the game page.
             liveStatusContainer.style.display = 'none';
-            adminControls.style.display = 'none'; // NEW
+            adminControls.style.display = 'none';
             stopListeningToLiveBets();
         }
     };
 
-    // Attaches a listener to a specific period's live bets and renders the data.
     const listenToLiveBets = (periodId) => {
-        stopListeningToLiveBets(); // Ensure no old listeners are running.
+        stopListeningToLiveBets();
         
         currentLiveBetPeriod = periodId;
         const diceSummaryList = document.getElementById('dice-summary-list');
@@ -1617,14 +1701,12 @@ document.addEventListener('DOMContentLoaded', () => {
             GAME_CONFIG.SYMBOLS.forEach(s => diceTotals[s.id] = 0);
             let userBetsHtml = '';
 
-            // Iterate over each user who has placed a bet.
             Object.values(allBets).forEach(userData => {
                 const username = userData.username;
                 const userBets = userData.bets;
                 let userChipsHtml = '';
                 let hasBets = false;
 
-                // Iterate over each bet from the user.
                 for(const symbolId in userBets) {
                     const amount = userBets[symbolId];
                     if (amount > 0) {
@@ -1652,7 +1734,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Build and render the summary of total amounts bet on each dice symbol.
             let diceSummaryHtml = '';
             GAME_CONFIG.SYMBOLS.forEach(symbol => {
                 const total = diceTotals[symbol.id];
@@ -1669,7 +1750,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    // NEW: Function to render the admin dice selection controls with counters.
     const renderAdminResultSelector = () => {
         const selectorContainer = document.getElementById('admin-result-selector');
         selectorContainer.innerHTML = '';
@@ -1677,18 +1757,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'admin-dice-selector-item';
             item.dataset.symbol = symbol.id;
-            // Add the counter badge element
             item.innerHTML = `<img src="${symbol.image}" alt="${symbol.id}"><div class="admin-dice-count">0</div>`;
             item.addEventListener('click', () => handleAdminDiceSelect(symbol.id));
             selectorContainer.appendChild(item);
         });
 
-        // Listen for changes from Firebase to keep UI in sync.
         db.ref('adminControls/nextResult').on('value', snapshot => {
             const selection = snapshot.val() || {};
             adminSelectionCounts = selection;
             
-            // Update the UI based on the fetched selection counts
             document.querySelectorAll('.admin-dice-selector-item').forEach(item => {
                 const symbolId = item.dataset.symbol;
                 const count = adminSelectionCounts[symbolId] || 0;
@@ -1701,31 +1778,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // NEW: Handle admin clicking on a dice to increment its count.
     const handleAdminDiceSelect = (symbolId) => {
-        // Calculate the current total number of selected dice.
         const currentTotalDice = Object.values(adminSelectionCounts).reduce((sum, count) => sum + count, 0);
 
         if (currentTotalDice >= 6) {
-            // Optional: provide feedback that the max has been reached.
             console.log("Maximum of 6 dice already selected.");
             return;
         }
 
-        // Increment the count for the selected symbol.
         const newCounts = { ...adminSelectionCounts };
         newCounts[symbolId] = (newCounts[symbolId] || 0) + 1;
 
-        // Update Firebase with the new selection counts.
         db.ref('adminControls/nextResult').set(newCounts);
     };
 
-    // NEW: Handle clearing the admin's selection.
     const handleAdminClearSelection = () => {
         db.ref('adminControls/nextResult').remove();
     };
 
-    // When a user places a bet, this function writes their bet data to Firebase for the admin to see.
     const updateLiveBetsOnServer = () => {
         if (!AppState.currentUser || AppState.currentUser.role === 'admin' || !gameState.serverState?.periodId) return;
 
@@ -1740,7 +1810,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 bets: gameState.currentBets
             });
         } else {
-            // If user clears all bets, remove their entry from live bets.
             userBetRef.remove();
         }
     };
@@ -1749,22 +1818,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================
     // ==================== REAL-TIME GAME LOGIC ================
     // ==========================================================
-    
-    const playAudio = () => {
-        if (!AppState.audioSettings.enabled) return;
-        if (gameAudio.paused) {
-            const playPromise = gameAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => { console.warn("Audio playback was prevented."); });
-            }
-        }
-    };
-    const pauseAudio = () => {
-        if (!gameAudio.paused) {
-            gameAudio.pause();
-            gameAudio.currentTime = 0; 
-        }
-    };
     
     const initializeGame = () => {
         bettingGridEl.innerHTML = '';
@@ -1870,8 +1923,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleServerStateUpdate = (serverState) => {
-        manageAdminLiveView(); // Check if admin view needs updating/starting/stopping
+        manageAdminLiveView();
         
+        // Start countdown audio when a new betting round begins
         if (gameState.serverState?.status !== 'betting' && serverState.status === 'betting') {
             playAudio();
         }
@@ -1912,20 +1966,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // MODIFIED: This function now uses the selection counts object to generate results.
     const processRoundEnd = () => {
         const adminChoiceRef = db.ref('adminControls/nextResult');
         
         adminChoiceRef.get().then(snapshot => {
-            const adminSelection = snapshot.val(); // e.g., { club: 2, heart: 1 }
+            const adminSelection = snapshot.val();
 
             gameStateRef.transaction(currentData => {
                 if (currentData && currentData.status === 'betting' && currentData.periodId === gameState.serverState.periodId) {
                     
                     let resultSymbols = [];
-                    // Check if a valid selection object exists.
                     if (adminSelection && typeof adminSelection === 'object' && Object.keys(adminSelection).length > 0) {
-                        // Build the result array from the counts object.
                         for (const symbolId in adminSelection) {
                             const count = adminSelection[symbolId];
                             for (let i = 0; i < count; i++) {
@@ -1934,7 +1985,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } 
                     
-                    // Fill the remaining dice randomly if the selection is less than 6.
                     while (resultSymbols.length < 6) {
                         const randomSymbol = GAME_CONFIG.SYMBOLS[Math.floor(Math.random() * GAME_CONFIG.SYMBOLS.length)].id;
                         resultSymbols.push(randomSymbol);
@@ -1943,22 +1993,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return {
                         ...currentData,
                         status: 'viewing_result',
-                        lastResult: resultSymbols.slice(0, 6), // Ensure it's exactly 6
+                        lastResult: resultSymbols.slice(0, 6),
                         roundEndTime: estimatedServerTime() + GAME_CONFIG.ANIMATION_DURATION + (GAME_CONFIG.RESULT_VIEW_DURATION * 1000)
                     };
                 }
-                return; // Abort transaction if conditions are not met.
+                return;
             }, (error, committed) => {
                 if (error) console.error("ProcessRoundEnd transaction failed:", error);
                 if (committed) {
-                    // Clear the admin's choice for the next round.
                     adminChoiceRef.remove();
                 }
                 gameState.isTransitioning = false;
             });
         }).catch(error => {
             console.error("Could not fetch admin controls, using random result:", error);
-            // Fallback to fully random result if fetching fails.
             gameStateRef.transaction(currentData => {
                  if (currentData && currentData.status === 'betting' && currentData.periodId === gameState.serverState.periodId ) {
                     const resultSymbols = Array.from({length: 6}, () => GAME_CONFIG.SYMBOLS[Math.floor(Math.random() * GAME_CONFIG.SYMBOLS.length)].id);
@@ -1997,7 +2045,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (committed) {
                 if (oldPeriodId) {
-                    // Clean up live bets from the previous round
                     db.ref(`liveBets/${oldPeriodId}`).remove();
                 }
                 resetLocalBets();
@@ -2006,6 +2053,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const calculateWinningsAndShowModal = (resultSymbols) => {
+        // Stop the countdown audio when results are announced
         pauseAudio();
         if (!AppState.currentUser || AppState.currentUser.role === 'admin') return;
 
@@ -2054,10 +2102,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultModalTextEl.innerHTML = `Congratulations! You won a net total of <b>₹${netProfit.toLocaleString()}</b>.`;
                 resultModalContentEl.classList.add('result-win');
                 if (window.confetti) confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+                
+                // Play win sound
+                if (isAudioUnlocked && AppState.audioSettings.enabled) {
+                    setTimeout(() => {
+                        winSound.currentTime = 0;
+                        winSound.play().catch(e => console.warn("Win sound playback was prevented.", e));
+                    }, 100); // 100ms delay to prevent audio conflicts
+                }
+
             } else {
                 resultModalTitleEl.textContent = 'You Lose!';
                 resultModalTextEl.textContent = `You lost ₹${Math.abs(netProfit).toLocaleString()}. Better luck next time.`;
                 resultModalContentEl.classList.add('result-loss');
+                
+                // Play loss sound
+                if (isAudioUnlocked && AppState.audioSettings.enabled) {
+                    setTimeout(() => {
+                        lossSound.currentTime = 0;
+                        lossSound.play().catch(e => console.warn("Loss sound playback was prevented.", e));
+                    }, 100); // 100ms delay to prevent audio conflicts
+                }
             }
 
             resultModalEl.classList.add('visible');
@@ -2183,8 +2248,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // NEW: Add event listener for the admin's clear selection button.
     document.getElementById('admin-clear-selection-btn').addEventListener('click', handleAdminClearSelection);
+    
+    // Show and handle the initial info modal and audio unlock
+    infoModal.classList.add('visible');
+
+    const closeInfoModal = () => {
+        infoModal.classList.remove('visible');
+    };
+
+    infoModalCloseBtn.addEventListener('click', () => {
+        unlockAudio();
+        closeInfoModal();
+    });
+
+    infoModalContactBtn.addEventListener('click', () => {
+        unlockAudio();
+        // The link will open in a new tab due to target="_blank"
+    });
+
+    infoModal.addEventListener('click', (e) => {
+        if (e.target === infoModal) {
+            unlockAudio();
+            closeInfoModal();
+        }
+    });
 });
 </script>
 <script>
