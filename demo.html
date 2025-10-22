@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -453,69 +454,7 @@
         overflow-y: auto;
         padding-right: 5px;
     }
-
-    /* <!-- NEW --> CSS styles for the admin result selector with counter */
-    #admin-result-selector {
-        grid-template-columns: repeat(6, 1fr); /* 6 in a row */
-        gap: 5px;
-    }
-    .admin-dice-selector-item {
-        height: 50px;
-        width: 100%;
-        border: 2px solid var(--gold);
-        border-radius: 8px;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: all 0.2s;
-        background-color: rgba(0,0,0,0.3);
-        position: relative; /* Needed for positioning the counter */
-    }
-    .admin-dice-selector-item img {
-        width: 50px;
-        height: 45px;
-        background-color: white;
-       border-radius: 8px
-    }
-    .admin-dice-selector-item:hover {
-        background-color: rgba(255,215,0,0.2);
-    }
-    .admin-dice-selector-item.active {
-        transform: scale(1.05);
-        box-shadow: 0 0 10px var(--gold);
-        border-color: #fff;
-    }
-    .admin-dice-count {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background-color: var(--gold);
-        color: var(--deep-red);
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        border: 2px solid white;
-        font-size: 0.9rem;
-        transform: scale(0);
-        transition: transform 0.2s ease-out;
-    }
-    .admin-dice-count.visible {
-        transform: scale(1);
-    }
-    #admin-clear-selection-btn {
-        margin-top: 15px;
-        width: auto;
-        padding: 8px 25px;
-        align-self: center;
-    }
-    /* <!-- END NEW --> */
-
-
+    
     /* Responsive for smaller screens */
     @media (max-width: 768px) {
         .user-history-sections {
@@ -593,7 +532,7 @@
                  <p style="text-align:center; opacity:0.7;">No users are currently betting.</p>
             </div>
         </div>
-      
+              
     </div>
 </main>
 
@@ -739,7 +678,6 @@
                 <label for="register-role">Account Type</label>
                 <select id="register-role">
                     <option value="user">User</option>
-                    
                 </select>
             </div>
             <button type="submit" class="btn">Register</button>
@@ -984,7 +922,8 @@ document.addEventListener('DOMContentLoaded', () => {
   storageBucket: "studio-ahutj.firebasestorage.app",
   messagingSenderId: "636752463109",
   appId: "1:636752463109:web:da78d4100720a39a20a36c"
-    };
+};
+
     
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -1013,9 +952,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let liveBetsRef = null; // To manage Firebase listener for admin live bets
     let currentLiveBetPeriod = null; // Track which period admin is listening to
     let prefilledReferralCode = null; // NEW: To store referral code from URL
-    
-    // State for admin's result selection, now an object to hold counts.
-    let adminSelectionCounts = {};
     
     // Flag to track if the user has interacted, unlocking audio.
     let isAudioUnlocked = false;
@@ -1966,14 +1902,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const manageAdminLiveView = () => {
         const liveStatusContainer = document.getElementById('live-betting-status');
-        const adminControls = document.getElementById('admin-controls-section');
         const isAdmin = AppState.currentUser?.role === 'admin';
         const isGamePageActive = document.getElementById('page-game').classList.contains('active');
 
         if (isAdmin && isGamePageActive) {
             liveStatusContainer.style.display = 'block';
-            adminControls.style.display = 'block';
-            renderAdminResultSelector();
             const currentPeriodId = gameState.serverState?.periodId;
             if (currentPeriodId) {
                 if (currentLiveBetPeriod !== currentPeriodId) {
@@ -1982,7 +1915,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             liveStatusContainer.style.display = 'none';
-            adminControls.style.display = 'none';
             stopListeningToLiveBets();
         }
     };
@@ -2056,53 +1988,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userBetsList.innerHTML = userBetsHtml || '<p style="text-align:center; opacity:0.7;">No users are currently betting.</p>';
         });
     };
-    
-    const renderAdminResultSelector = () => {
-        const selectorContainer = document.getElementById('admin-result-selector');
-        selectorContainer.innerHTML = '';
-        GAME_CONFIG.SYMBOLS.forEach(symbol => {
-            const item = document.createElement('div');
-            item.className = 'admin-dice-selector-item';
-            item.dataset.symbol = symbol.id;
-            item.innerHTML = `<img src="${symbol.image}" alt="${symbol.id}"><div class="admin-dice-count">0</div>`;
-            item.addEventListener('click', () => handleAdminDiceSelect(symbol.id));
-            selectorContainer.appendChild(item);
-        });
-
-        db.ref('adminControls/nextResult').on('value', snapshot => {
-            const selection = snapshot.val() || {};
-            adminSelectionCounts = selection;
-            
-            document.querySelectorAll('.admin-dice-selector-item').forEach(item => {
-                const symbolId = item.dataset.symbol;
-                const count = adminSelectionCounts[symbolId] || 0;
-                const countEl = item.querySelector('.admin-dice-count');
-                
-                countEl.textContent = count;
-                countEl.classList.toggle('visible', count > 0);
-                item.classList.toggle('active', count > 0);
-            });
-        });
-    };
-
-    const handleAdminDiceSelect = (symbolId) => {
-        const currentTotalDice = Object.values(adminSelectionCounts).reduce((sum, count) => sum + count, 0);
-
-        if (currentTotalDice >= 6) {
-            console.log("Maximum of 6 dice already selected.");
-            return;
-        }
-
-        const newCounts = { ...adminSelectionCounts };
-        newCounts[symbolId] = (newCounts[symbolId] || 0) + 1;
-
-        db.ref('adminControls/nextResult').set(newCounts);
-    };
-
-    const handleAdminClearSelection = () => {
-        db.ref('adminControls/nextResult').remove();
-    };
-    
+        
     const updateLiveBetsOnServer = () => {
         if (!AppState.currentUser || AppState.currentUser.role === 'admin' || !gameState.serverState?.periodId) return;
 
@@ -2281,61 +2167,26 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const processRoundEnd = () => {
-        const adminChoiceRef = db.ref('adminControls/nextResult');
-        
-        adminChoiceRef.get().then(snapshot => {
-            const adminSelection = snapshot.val();
-
-            gameStateRef.transaction(currentData => {
-                if (currentData && currentData.status === 'betting' && currentData.periodId === gameState.serverState.periodId) {
-                    
-                    let resultSymbols = [];
-                    if (adminSelection && typeof adminSelection === 'object' && Object.keys(adminSelection).length > 0) {
-                        for (const symbolId in adminSelection) {
-                            const count = adminSelection[symbolId];
-                            for (let i = 0; i < count; i++) {
-                                resultSymbols.push(symbolId);
-                            }
-                        }
-                    } 
-                    
-                    while (resultSymbols.length < 6) {
-                        const randomSymbol = GAME_CONFIG.SYMBOLS[Math.floor(Math.random() * GAME_CONFIG.SYMBOLS.length)].id;
-                        resultSymbols.push(randomSymbol);
-                    }
-                    
-                    return {
-                        ...currentData,
-                        status: 'viewing_result',
-                        lastResult: resultSymbols.slice(0, 6),
-                        roundEndTime: estimatedServerTime() + GAME_CONFIG.ANIMATION_DURATION + (GAME_CONFIG.RESULT_VIEW_DURATION * 1000)
-                    };
-                }
-                return;
-            }, (error, committed) => {
-                if (error) console.error("ProcessRoundEnd transaction failed:", error);
-                if (committed) {
-                    adminChoiceRef.remove();
-                }
-                gameState.isTransitioning = false;
-            });
-        }).catch(error => {
-            console.error("Could not fetch admin controls, using random result:", error);
-            gameStateRef.transaction(currentData => {
-                 if (currentData && currentData.status === 'betting' && currentData.periodId === gameState.serverState.periodId ) {
-                    const resultSymbols = Array.from({length: 6}, () => GAME_CONFIG.SYMBOLS[Math.floor(Math.random() * GAME_CONFIG.SYMBOLS.length)].id);
-                    return {
-                        ...currentData,
-                        status: 'viewing_result',
-                        lastResult: resultSymbols,
-                        roundEndTime: estimatedServerTime() + GAME_CONFIG.ANIMATION_DURATION + (GAME_CONFIG.RESULT_VIEW_DURATION * 1000)
-                    };
-                }
-                return;
-            }, (error, committed) => {
-                if (error) console.error("ProcessRoundEnd transaction failed:", error);
-                gameState.isTransitioning = false;
-            });
+        gameStateRef.transaction(currentData => {
+            // Check if the current state on the server is what we expect
+            if (currentData && currentData.status === 'betting' && currentData.periodId === gameState.serverState.periodId) {
+                // Always generate a completely random result
+                const resultSymbols = Array.from({length: 6}, () => GAME_CONFIG.SYMBOLS[Math.floor(Math.random() * GAME_CONFIG.SYMBOLS.length)].id);
+                
+                // Return the new state object for the transaction
+                return {
+                    ...currentData,
+                    status: 'viewing_result',
+                    lastResult: resultSymbols,
+                    roundEndTime: estimatedServerTime() + GAME_CONFIG.ANIMATION_DURATION + (GAME_CONFIG.RESULT_VIEW_DURATION * 1000)
+                };
+            }
+            // Abort the transaction if the state isn't what we expect
+            return; 
+        }, (error, committed) => {
+            if (error) console.error("ProcessRoundEnd transaction failed:", error);
+            // In either case, we need to allow the game to continue
+            gameState.isTransitioning = false; 
         });
     };
 
@@ -2641,8 +2492,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.getElementById('admin-clear-selection-btn').addEventListener('click', handleAdminClearSelection);
-    
     copyReferralBtn.addEventListener('click', () => {
         const code = referralCodeDisplay.textContent;
         navigator.clipboard.writeText(code).then(() => {
